@@ -2,6 +2,8 @@ import { Element as TinyElement } from '@tiny-lit/element';
 import { html } from '@tiny-lit/core';
 import { getType, isPrimitive, JsonObject, generateNodePreview, isNode, classNames } from './utils';
 
+import styles from 'bundle-text:./styles.css';
+
 const ObjectKey = ({ isCollapsable, collapsed, onClick, key }) => html`
     <span
         class=${classNames(key && 'key', isCollapsable && 'collapsable', collapsed && 'collapsableCollapsed')}
@@ -124,106 +126,26 @@ class JsonViewer extends TinyElement {
         super.connectedCallback();
     }
 
+    renderObjectNode(data) {
+        return html`
+            <ul>
+                ${Object.keys(data || {}).map(key =>
+                    html`
+                        <li>
+                            <json-nested-object-node key=${key} data=${data[key]}></json-nested-object-node>
+                        </li>
+                    `.withKey(key)
+                )}
+            </ul>
+        `;
+    }
+
     render() {
         return html`
             <style>
-                :host {
-                    --background-color: rgb(42, 47, 58);
-                    --color: #f8f8f2;
-                    --string-color: #a3eea0;
-                    --number-color: #d19a66;
-                    --boolean-color: #4ba7ef;
-                    --null-color: #df9cf3;
-                    --key-color: rgb(111, 179, 210);
-                    --font-family: monaco, Consolas, 'Lucida Console', monospace;
-                    --preview-color: rgba(222, 175, 143, 0.9);
-
-                    display: block;
-                    background-color: var(--background-color);
-                    color: var(--color);
-                    padding: 0.5rem;
-                    font-family: var(--font-family);
-                    font-size: 1rem;
-                }
-
-                .preview {
-                    color: var(--preview-color);
-                }
-
-                .null {
-                    color: var(--null-color, #df9cf3);
-                }
-
-                .key {
-                    color: var(--key-color, #f9857b);
-                    display: inline-block;
-                }
-
-                .collapsable:before {
-                    display: inline-block;
-                    color: var(--color);
-                    padding-right: 5px;
-                    padding-left: 5px;
-                    font-size: 0.7rem;
-                    content: '▶';
-                    transition: transform 195ms ease-in;
-                    transform: rotate(90deg);
-                    color: var(--key-color);
-                }
-
-                .collapsable.collapsableCollapsed:before {
-                    transform: rotate(0);
-                }
-
-                .collapsable {
-                    cursor: pointer;
-                    user-select: none;
-                }
-
-                .string {
-                    color: var(--string-color);
-                }
-
-                .number {
-                    color: var(--number-color);
-                }
-
-                .boolean {
-                    color: var(--boolean-color);
-                }
-
-                ul {
-                    padding: 0;
-                    clear: both;
-                }
-
-                ul,
-                li {
-                    list-style: none;
-                    position: relative;
-                }
-
-                li ul > li {
-                    position: relative;
-                    padding-top: 0.25rem;
-                    margin-left: 1.5rem;
-                    padding-left: 0px;
-                }
-
-                json-nested-object-node ul:before {
-                    content: '';
-                    border-left: 1px solid #333;
-                    position: absolute;
-                    left: 0.5rem;
-                    top: 0.5rem;
-                    bottom: 0.5rem;
-                }
-
-                json-nested-object-node ul:hover:before {
-                    border-left: 1px solid #666;
-                }
+                ${styles}
             </style>
-            <json-object-node data=${this.data}></json-object-node>
+            ${this.renderObjectNode(this.data)}
         `;
     }
 }
