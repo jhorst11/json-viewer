@@ -19,7 +19,8 @@ class JsonNestedObjectNode extends TinyElement {
         return {
             data: JsonObject,
             collapsed: Boolean,
-            key: String
+            key: String,
+            link: Boolean
         };
     }
 
@@ -32,11 +33,24 @@ class JsonNestedObjectNode extends TinyElement {
         this.collapsed = !this.collapsed;
     };
 
+    handleLinkClick = e => {
+        if (this.link) {
+            e.preventDefault();
+            this.dispatchEvent(new CustomEvent('linkClick', { detail: this.data, bubbles: true, composed: true }));
+        }
+    };
+
     renderValue(node) {
         return isNode(node)
-            ? node
+            ? html`
+                  <div>${node}</div>
+              `
             : html`
-                  <span class=${getType(node)}>${JSON.stringify(node)}</span>
+                  <span class=${getType(node)}
+                      ><span class=${this.link ? 'link' : ''} onClick=${this.handleLinkClick}
+                          >${JSON.stringify(node)}</span
+                      ></span
+                  >
               `;
     }
 
@@ -84,13 +98,17 @@ class JsonObjectNode extends TinyElement {
     }
 
     renderObject(data) {
-        return Object.keys(data).map(key =>
-            html`
+        return Object.keys(data).map(key => {
+            return html`
                 <li>
-                    <json-nested-object-node key=${key} data=${data[key]}></json-nested-object-node>
+                    <json-nested-object-node
+                        key=${key}
+                        link=${key === '__ref'}
+                        data=${data[key]}
+                    ></json-nested-object-node>
                 </li>
-            `.withKey(key)
-        );
+            `.withKey(key);
+        });
     }
 
     renderPrimitive(data) {
@@ -140,8 +158,9 @@ class JsonViewer extends TinyElement {
         return html`
             <style>
                 :host {
-                    --background-color: #2a2f3a;
                     --color: #f8f8f2;
+                    --color-link: #006dcc;
+                    --color-link-hover: #005fb2;
                     --string-color: #a3eea0;
                     --number-color: #d19a66;
                     --boolean-color: #4ba7ef;
@@ -153,7 +172,6 @@ class JsonViewer extends TinyElement {
                     display: block;
                     background-color: var(--background-color);
                     color: var(--color);
-                    padding: 0.5rem;
                     font-family: var(--font-family);
                     font-size: 1rem;
                 }
@@ -190,6 +208,15 @@ class JsonViewer extends TinyElement {
                 .collapsable {
                     cursor: pointer;
                     user-select: none;
+                }
+
+                .link {
+                    color: var(--color-link);
+                    cursor: pointer;
+                }
+
+                .link:hover {
+                    color: var(--color-link-hover);
                 }
 
                 .string {
