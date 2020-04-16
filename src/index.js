@@ -54,10 +54,10 @@ class JsonNestedObjectNode extends TinyElement {
               `;
     }
 
-    renderChild(node) {
+    renderChild(node, onPreviewClick) {
         return this.collapsed
             ? html`
-                  <span class="preview">
+                  <span class="preview" onClick=${onPreviewClick}>
                       ${generateNodePreview(node)}
                   </span>
               `
@@ -77,7 +77,7 @@ class JsonNestedObjectNode extends TinyElement {
                 key,
                 onClick: !isPrimitiveOrNode && this.handleKeyClick
             })}
-            ${isPrimitiveOrNode ? this.renderValue(data) : this.renderChild(data)}
+            ${isPrimitiveOrNode ? this.renderValue(data) : this.renderChild(data, this.handleKeyClick)}
         `;
     }
 }
@@ -178,6 +178,7 @@ class JsonViewer extends TinyElement {
 
                 .preview {
                     color: var(--preview-color);
+                    cursor: pointer;
                 }
 
                 .null {
